@@ -21,36 +21,36 @@
 
 \begin{document}
 \tableofcontents\newpage
-\part{Algoritme}
-Orientat a Grafs.
-\section{Optimització fins el moment}
+\part{Optimitzacions}
 \begin{enumerate}
-\item No faràs un graf de major profunditat de la demanada
-\item Mouràs màxim -1 moviments, més no tenen sentit
-\item Només cal moure \red{U} $\uparrow$ ``up'', i \red{R} $\to$ ``right''.
-\item Només cal (files $\times$ columnes):
+\item Només cal moure \red{$U$} $\uparrow$ ``up'', i \red{$R$} $\to$ ``right''.
+% és subtil, però és bo tenir-lo present
+\item Els fills no repetiran la mateixa direcció
+\item Generador
 	\begin{itemize}
 	\item (1 $\times$ n)
-		\subitem \red{U} /1/$\quad$/1 $\to$ (columnes -1)/
-	\item (n $\times$ 1)
-		\subitem \red{R} /1 $\to$ (files -1)/$\quad$/1/
+		\subitem \red{U}$\quad$ 1 $\to$ (columnes -1)
+	\item (m $\times$ 1)
+		\subitem \red{R}$\quad$ 1 $\to$ (files -1)
 	\end{itemize}
-\item Els fills no repetiran la mateixa direcció a la mateixa posició
-\end{enumerate}
-
-\section{Optimització desitjada}
-\begin{enumerate}
-\item No fer moviments que es contrarestin. No voldria anular tota la feina feta.
-\item M'agradaria si la sortida n'és una, fer uns moviments més tancats que la gran majoria.
 \end{enumerate}
 
 \section{Planificació}
+Ja que suposem que no coneixem la profunditat màxima.
+\Tree [.1 [.2 [.4 8 9 ] [.5 10 11 ] ] [.3 [.6 12 13 ] [.7 14 15 ] ] ]
 
-\subsection{Ordre d'exploració}
-\Tree [.1 [.2 [.3 4 5 ] [.6 7 8 ] ] [.9 [.10 11 12 ] [.13 14 15 ] ] ]
-Llavors l'algoritme quedarà representat.\\
+\section{Algoritme}
+\subsection{Estil nodes, grafs, arbre}
+\paragraph{Idea bàsica}
+Generarem un objecte el qual cridarà als seus fills, i esperarà a la solució desitjada.
+\paragraph{Problemes aparents}
+Tindrà tot els pares i fills en memòria, quan realment només són necessaris els seus fills.\\
+Però no estic realment segur del problema, ja que d'altra forma no sé com podria guardar els seus pares.\\
 
-\subsection{Idea gran}
+Per exemple, jo només vull com a sortida 0R2, 3U4, etc, això gairebé no ocupa espai.
+\paragraph{Avantatges}
+Sembla més fàcil d'entendre.
+\subsubsection{Mostra de l'algoritme}
 \begin{algorithm} % http://osl.ugr.es/CTAN/macros/latex/contrib/algorithm2e/doc/algorithm2e.pdf
 % defecte python
 \SetStartEndCondition{ }{}{}%
@@ -59,97 +59,87 @@ Llavors l'algoritme quedarà representat.\\
 \SetKw{KwTo}{in}\SetKwFor{For}{for}{\string:}{}%
 \SetKwIF{If}{ElseIf}{Else}{if}{:}{elif}{else:}{}%
 \SetKwFor{While}{while}{:}{}%{endWhile}%
-%\newcommand{\forcond}{$i$ \KwTo\Range{$n$}}
-%\AlgoDontDisplayBlockMarkers\SetAlgoNoEnd\SetAlgoNoLine%
+% Això és un copiar i pegar del anterior tex que vaig fer.
 
+% Definir tot el que necessito
 % Programes
 \SetKwProg{funTot}{Funció}{\string:}{}%{EndFunció}
 % Variables
-\SetKwData{Matriu}{matriu}
-\SetKwData{Canvi}{\red{canvi}}
-\SetKwData{mE}{matriuEnd}
-\SetKwData{tmp}{temporalPosibleSolucio}
-\SetKwData{arr}{array}
-\SetKwData{False}{false}
-\SetKwData{Profunditat}{level}
+\SetKwData{Directori}{directori}
+\SetKwData{MatriuEntrada}{matriuEntrada}
+\SetKwData{MatriuSolucio}{matriuSolució}
+\SetKwData{Solucio}{solució}
+\SetKwData{TamanyNombreFills}{n}
+\SetKwData{VarGenerador}{\red{generador}}
+\SetKwData{Array}{arr}
+\SetKwData{Auxiliar}{aux}
+\SetKwData{Int}{i}
 % Funcions
-\SetKwFunction{MatriuHasNext}{matriu.hasNext}
-\SetKwFunction{This}{this}
-\SetKwFunction{funRecursiu}{Funció\_Recursiva}
-\SetKwFunction{gen}{matriu.MakeGenerator}
-\SetKwFunction{mcv}{matriu.canvi}
-\SetKwFunction{add}{array.add}
-\SetKwFunction{ProfunditatMatriu}{matriu.level}
+\SetKwFunction{funBegin}{Funció\_Recursiva}
+\SetKwFunction{funNext}{\blue{Funció\_Recorre\_Recorregut}}
+\SetKwFunction{Llegeix}{Llegeix}
+\SetKwFunction{Generador}{Generador}
+\SetKwFunction{Next}{next}
+\SetKwFunction{Xrange}{xrange}
+\SetKwFunction{Append}{append}
 % In sortida
 \SetKwInOut{Input}{input}
 \SetKwInOut{Output}{output}
 \SetKwInOut{Yield}{yield}
+\SetKwInOut{Return}{return}
 
+% Comença tota la màgia
 % Programa
-\funTot{ \funRecursiu{Canvi a efectuar}}{
-\Input{\Canvi, \Matriu}
-\Output{Camí per a solucionar el problema}
-
-\BlankLine
-\tcc*[h]{Comprovar si el canvi efectuat ja es la solució desitjada}\\
-\mcv{\Canvi}\\
-\If{\Matriu $\overset{?}{=}$ \mE}{%$ ?^{?^{?^?}}_{\to_{\to_{\to_\to}}} $}{
-\arr $= \emptyset$\\
-\add{\Canvi}\\
-\Yield \arr
-\BlankLine
-}\tcc{Comprovar si hem d'acabar aquesta branca}
-\ElseIf{\ProfunditatMatriu{} $\overset{?}{=}$ \Profunditat}
+\funTot{ \funBegin{\Directori} }
 {
-	\Yield \False
-}
-
-\BlankLine
-\gen{\Canvi}
-\BlankLine
-
-	\While{\MatriuHasNext{}}
-	{
-		\BlankLine
-		\arr = \funRecursiu{\Canvi}
-		\BlankLine
-		\tcc{Comprovar si és solució}
-		\If{\arr}
-		{
-			\add{\Canvi}\\
-			\Yield \arr
-		}
-	}
+	\Input{\MatriuEntrada, \MatriuSolucio}
+	\Output{\Solucio}
+	\MatriuEntrada, \MatriuSolucio = \Llegeix{\Directori }\\
+	\VarGenerador = \Generador{\MatriuEntrada, \red{null}}\\
+	\TamanyNombreFills = \VarGenerador.\Next{}\\
+	\Array = []\\
+\tcc*[h]{Totes les variables necessàries inicialitzades}\\
+% fins aquí per arrancar el programa en si
 
 	\BlankLine
-	\tcc{Si arribem aquí, malament.}
-	\Yield \False
+\tcc*[h]{Comencem a inicialitzar els fills}\\
+	\For{\Int $\in$ \Xrange{\TamanyNombreFills} }
+	{
+		\Array.\Append{\funNext{\VarGenerador.\Next{}}}
+	}
+	\BlankLine
+
+\tcc*[h]{El programa en si, aparentment infinit}\\
+	\While{ 1 }
+	{
+		\For{\Int $\in$ \Xrange{\TamanyNombreFills} }
+		{
+			\Auxiliar = \Array[\Int].\Next{}\\
+			\If{\Auxiliar}
+			{
+				\Return{\Auxiliar}
+			}
+		}
+	}
+}
+\funTot{ \funNext{algo} }
+{
+	La continuacio
 }
 \end{algorithm}
 
-\subsection{Generar el iterador}
+% El que m'ha dit en Martin, i realment crec que hauria de ser així el meu programa. En sap molt aquest noi.
+\subsection{Estil cua, grafs}
+\paragraph{Idea bàsica}
+Tens una cua, treus un element, llavors obtens tots els seus fills, i si veus que no son la solució desitjada els tornes dins la cua.
+\paragraph{Problemes aparents}
+Sembla més difícil d'implementar perquè no he madurat cap idea per a fer-ho per aquest camí.
+\paragraph{Avantatges}
+L'execució del programa serà considerablement molt més ràpida.\\
 
-\part{Comunicació}
-\section{Entrada d'informació}
-\begin{itemize}
-\item 1era línia
-	\subitem Màxim moviments permesos
-\item Matriu entrada
-\item Espai en blanc
-\item Matriu sortida
-\end{itemize}
-Separats per espais, contenint lletres, en referència a la inicial del color.
+Sembla que podríem aconseguir que sortiríem tant del inici com del final, i anar comprovant si coincideixen els resultats, si és el cas has
+acabat.\\
+Aparentment donaria com a resultat que no seria necessari aprofundir tant els arbres.\\
+Pega, que hauries de trobar un bon sistema de comparació per no fer-ho excessivament lent en si el programa.
 
-\section{Sortida d'informació}
-encarà no hi he pensat
-
-\part{Warnings}
-\section{Generar noves matrius}
-Quan faig la crida recursiva, preferiria controlar amb gran nivell que està passant, vull evitar el gran problema d'editar la mateixa
-matriu
-
-\part{Millores}
-Canviar l'algoritme per aquest:
-\Tree [.1 [.2 [.4 8 9 ] [.5 10 11 ] ] [.3 [.6 12 13 ] [.7 14 15 ] ] ]
-D'aquesta forma no caldria indicar la profunditat màxima
 \end{document}

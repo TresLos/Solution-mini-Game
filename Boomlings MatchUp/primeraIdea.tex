@@ -1,0 +1,155 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[catalan]{babel}
+
+% a estudiar plis http://www.ling.upenn.edu/advice/latex/qtree/
+
+% Opino que la vida sense color no es vida
+\usepackage{color}
+\newcommand{\blue}[1]{{\color{blue}#1}}
+\newcommand{\red}[1]{{\color{red}#1}}
+
+% Bastant elemental
+\usepackage{amssymb, amsmath}
+
+% per crear algoritmes http://minisconlatex.blogspot.com.es/2012/10/pseudocodigo.html
+% \usepackage{algpseudocode, program}
+\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+
+% genera arbres
+\usepackage{qtree}
+
+\begin{document}
+\tableofcontents\newpage
+\part{Algoritme}
+Orientat a Grafs.
+\section{Optimització fins el moment}
+\begin{enumerate}
+\item No faràs un graf de major profunditat de la demanada
+\item Mouràs màxim -1 moviments, més no tenen sentit
+\item Només cal moure \red{U} $\uparrow$ ``up'', i \red{R} $\to$ ``right''.
+\item Només cal (files $\times$ columnes):
+	\begin{itemize}
+	\item (1 $\times$ n)
+		\subitem \red{U} /1/$\quad$/1 $\to$ (columnes -1)/
+	\item (n $\times$ 1)
+		\subitem \red{R} /1 $\to$ (files -1)/$\quad$/1/
+	\end{itemize}
+\item Els fills no repetiran la mateixa direcció a la mateixa posició
+\end{enumerate}
+
+\section{Optimització desitjada}
+\begin{enumerate}
+\item No fer moviments que es contrarestin. No voldria anular tota la feina feta.
+\item M'agradaria si la sortida n'és una, fer uns moviments més tancats que la gran majoria.
+\end{enumerate}
+
+\section{Planificació}
+
+\subsection{Ordre d'exploració}
+\Tree [.1 [.2 [.3 4 5 ] [.6 7 8 ] ] [.9 [.10 11 12 ] [.13 14 15 ] ] ]
+Llavors l'algoritme quedarà representat.\\
+
+\subsection{Idea gran}
+\begin{algorithm} % http://osl.ugr.es/CTAN/macros/latex/contrib/algorithm2e/doc/algorithm2e.pdf
+% defecte python
+\SetStartEndCondition{ }{}{}%
+\SetKwProg{Fn}{def}{\string:}{}
+\SetKwFunction{Range}{range}%%
+\SetKw{KwTo}{in}\SetKwFor{For}{for}{\string:}{}%
+\SetKwIF{If}{ElseIf}{Else}{if}{:}{elif}{else:}{}%
+\SetKwFor{While}{while}{:}{}%{endWhile}%
+%\newcommand{\forcond}{$i$ \KwTo\Range{$n$}}
+%\AlgoDontDisplayBlockMarkers\SetAlgoNoEnd\SetAlgoNoLine%
+
+% Programes
+\SetKwProg{funTot}{Funció}{\string:}{}%{EndFunció}
+% Variables
+\SetKwData{Matriu}{matriu}
+\SetKwData{Canvi}{\red{canvi}}
+\SetKwData{mE}{matriuEnd}
+\SetKwData{tmp}{temporalPosibleSolucio}
+\SetKwData{arr}{array}
+\SetKwData{False}{false}
+\SetKwData{Profunditat}{level}
+% Funcions
+\SetKwFunction{MatriuHasNext}{matriu.hasNext}
+\SetKwFunction{This}{this}
+\SetKwFunction{funRecursiu}{Funció\_Recursiva}
+\SetKwFunction{gen}{matriu.MakeGenerator}
+\SetKwFunction{mcv}{matriu.canvi}
+\SetKwFunction{add}{array.add}
+\SetKwFunction{ProfunditatMatriu}{matriu.level}
+% In sortida
+\SetKwInOut{Input}{input}
+\SetKwInOut{Output}{output}
+\SetKwInOut{Yield}{yield}
+
+% Programa
+\funTot{ \funRecursiu{Canvi a efectuar}}{
+\Input{\Canvi, \Matriu}
+\Output{Camí per a solucionar el problema}
+
+\BlankLine
+\tcc*[h]{Comprovar si el canvi efectuat ja es la solució desitjada}\\
+\mcv{\Canvi}\\
+\If{\Matriu $\overset{?}{=}$ \mE}{%$ ?^{?^{?^?}}_{\to_{\to_{\to_\to}}} $}{
+\arr $= \emptyset$\\
+\add{\Canvi}\\
+\Yield \arr
+\BlankLine
+}\tcc{Comprovar si hem d'acabar aquesta branca}
+\ElseIf{\ProfunditatMatriu{} $\overset{?}{=}$ \Profunditat}
+{
+	\Yield \False
+}
+
+\BlankLine
+\gen{\Canvi}
+\BlankLine
+
+	\While{\MatriuHasNext{}}
+	{
+		\BlankLine
+		\arr = \funRecursiu{\Canvi}
+		\BlankLine
+		\tcc{Comprovar si és solució}
+		\If{\arr}
+		{
+			\add{\Canvi}\\
+			\Yield \arr
+		}
+	}
+
+	\BlankLine
+	\tcc{Si arribem aquí, malament.}
+	\Yield \False
+}
+\end{algorithm}
+
+\subsection{Generar el iterador}
+
+\part{Comunicació}
+\section{Entrada d'informació}
+\begin{itemize}
+\item 1era línia
+	\subitem Màxim moviments permesos
+\item Matriu entrada
+\item Espai en blanc
+\item Matriu sortida
+\end{itemize}
+Separats per espais, contenint lletres, en referència a la inicial del color.
+
+\section{Sortida d'informació}
+encarà no hi he pensat
+
+\part{Warnings}
+\section{Generar noves matrius}
+Quan faig la crida recursiva, preferiria controlar amb gran nivell que està passant, vull evitar el gran problema d'editar la mateixa
+matriu
+
+\part{Millores}
+Canviar l'algoritme per aquest:
+\Tree [.1 [.2 [.4 8 9 ] [.5 10 11 ] ] [.3 [.6 12 13 ] [.7 14 15 ] ] ]
+D'aquesta forma no caldria indicar la profunditat màxima
+\end{document}
