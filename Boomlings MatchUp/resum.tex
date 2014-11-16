@@ -50,6 +50,7 @@ Però no estic realment segur del problema, ja que d'altra forma no sé com podr
 Per exemple, jo només vull com a sortida 0R2, 3U4, etc, això gairebé no ocupa espai.
 \paragraph{Avantatges}
 Sembla més fàcil d'entendre.
+\newpage
 \subsubsection{Mostra de l'algoritme}
 \begin{algorithm} % http://osl.ugr.es/CTAN/macros/latex/contrib/algorithm2e/doc/algorithm2e.pdf
 % defecte python
@@ -74,6 +75,7 @@ Sembla més fàcil d'entendre.
 \SetKwData{Array}{arr}
 \SetKwData{Auxiliar}{aux}
 \SetKwData{Int}{i}
+\SetKwData{Anar}{\red{c\blue{am}í}}
 % Funcions
 \SetKwFunction{funBegin}{Funció\_Recursiva}
 \SetKwFunction{funNext}{\blue{Funció\_Recorre\_Recorregut}}
@@ -122,9 +124,41 @@ Sembla més fàcil d'entendre.
 		}
 	}
 }
-\funTot{ \funNext{algo} }
+\BlankLine
+\BlankLine
+\funTot{ \funNext{\Anar} }
 {
-	La continuacio
+\tcc*[h]{Per quan ha acabat el programa}\\
+	\If{\MatriuEntrada.\Next{\Anar} $\overset{?}{=}$ \MatriuSolucio}
+	{
+		\Yield{$[$\Anar$]$}
+	}
+\BlankLine
+\tcc*[h]{Inicialitzem valors}\\
+	\VarGenerador = \Generador{\MatriuEntrada, \Anar}\\
+	\TamanyNombreFills = \VarGenerador.\Next{}\\
+	\Array = []
+\BlankLine
+\tcc*[h]{Generar els fills}\\
+	\For{\Int $\in$ \Xrange{\TamanyNombreFills}}
+	{
+		\Array.\Append{\funNext{\VarGenerador.\Next{}}}
+	}
+\BlankLine
+\tcc*[h]{El programa en si}\\
+	\While{ 1 }
+	{
+		\Yield{\red{False, False}}
+		\BlankLine
+		\For{\Int $\in$ \Xrange{\TamanyNombreFills} }
+		{
+			\Auxiliar, \Anar = \Array[\Int].\Next{}\\
+			\If{\Auxiliar}
+			{
+				\Return{\blue{True}, \Auxiliar + $[$\Anar$]$}
+			}
+		}
+	}
 }
 \end{algorithm}
 
