@@ -2,6 +2,10 @@
 # Es una proposta per a millorar les prestacions del yield
 # Versio 0.1.0 jajajajajja - la 0.0.0 era el yield -
 
+#angita, gracies
+#raise suelta un error, como una exception except
+#assert algo = noseque algo is loquesea
+
 import Queue
 
 def Begin (n):
@@ -47,8 +51,6 @@ def Brutus (nameFile):
 		qIn, qtmp = qtmp, qIn
 
 # Si tingues l'apartat 2, serie exactament el doble de rapid
-
-
 
 ################################################################################################################################
 ##                                                          AJUDA                                                             ##
